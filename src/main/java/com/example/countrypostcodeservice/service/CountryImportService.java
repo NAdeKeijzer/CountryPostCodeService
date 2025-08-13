@@ -28,8 +28,6 @@ public class CountryImportService {
         String path = "/v3.1/alpha/" + code + "?fields=name,postalCode,cca2";
 
         RestCountry[] response;
-        // src/main/java/com/example/countrypostcodeservice/service/CountryImportService.java
-// inside fetchAndSave(...)
         try {
             response = client.get()
                     .uri(path)
@@ -41,7 +39,6 @@ public class CountryImportService {
             throw new CountryImportException("REST Countries returned " + e.getStatusCode().value()
                     + " for " + path, e);
         } catch (Exception e) {
-            // TLS/proxy/connection issues land here
             throw new CountryImportException("Failed calling REST Countries: " + e.getMessage(), e);
         }
 
