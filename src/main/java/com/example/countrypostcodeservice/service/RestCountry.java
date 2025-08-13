@@ -1,4 +1,3 @@
-// src/main/java/com/example/countrypostcodeservice/service/RestCountry.java
 package com.example.countrypostcodeservice.service;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

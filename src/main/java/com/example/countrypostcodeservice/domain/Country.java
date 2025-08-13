@@ -1,4 +1,3 @@
-// src/main/java/com/example/countrypostcodeservice/domain/Country.java
 package com.example.countrypostcodeservice.domain;
 
 import jakarta.persistence.*;
