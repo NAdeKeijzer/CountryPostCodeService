@@ -1,4 +1,3 @@
-// src/test/java/com/example/countrypostcodeservice/service/CountryImportServiceTest.java
 package com.example.countrypostcodeservice.service;
 
 import com.example.countrypostcodeservice.domain.Country;
@@ -30,14 +29,14 @@ class CountryImportServiceTest {
     }
 
     @Test
-    void fetchAndSave_mapsAndPersists_Netherlands() throws InterruptedException {
-        // given upstream returns array with NL (only fields we care about)
+    void fetchAndSave_mapsAndPersists_Netherlands() throws Exception {
+        // given upstream returns a SINGLE OBJECT for NL
         String body = """
-            [{
+            {
               "cca2": "NL",
               "name": { "common": "Netherlands" },
               "postalCode": { "format": "#### @@", "regex": "^(\\\\d{4}[A-Z]{2})$" }
-            }]
+            }
             """;
         server.enqueue(new MockResponse().setResponseCode(200)
                 .setHeader("Content-Type", "application/json")
@@ -63,9 +62,10 @@ class CountryImportServiceTest {
         assertThat(saved.getPostalFormat()).isEqualTo("#### @@");
         assertThat(saved.getPostalRegex()).isEqualTo("^(\\d{4}[A-Z]{2})$");
 
-        // verify path contains our fields filter
+        // verify request path uses /alpha/{code} and our fields filter
         var req = server.takeRequest();
-        assertThat(req.getPath()).contains("/v3.1/alpha/nl")
+        assertThat(req.getPath())
+                .startsWith("/v3.1/alpha/nl")
                 .contains("fields=name,postalCode,cca2");
 
         verify(repo, times(1)).save(any(Country.class));
@@ -89,12 +89,13 @@ class CountryImportServiceTest {
 
     @Test
     void fetchAndSave_returnsEmpty_whenCommonNameMissing() {
+        // single object with empty 'name'
         String body = """
-            [{
+            {
               "cca2": "CO",
               "name": {},
               "postalCode": { "format": null, "regex": null }
-            }]
+            }
             """;
         server.enqueue(new MockResponse().setResponseCode(200)
                 .setHeader("Content-Type", "application/json")
@@ -115,11 +116,11 @@ class CountryImportServiceTest {
     @Test
     void fetchAndSave_maps_Colombia_withNullPostalFields() {
         String body = """
-            [{
+            {
               "cca2": "CO",
               "name": { "common": "Colombia" },
               "postalCode": { "format": null, "regex": null }
-            }]
+            }
             """;
         server.enqueue(new MockResponse()
                 .setResponseCode(200)
@@ -146,11 +147,11 @@ class CountryImportServiceTest {
     @Test
     void fetchAndSave_maps_China_withSixDigitRegex() {
         String body = """
-            [{
+            {
               "cca2": "CN",
               "name": { "common": "China" },
               "postalCode": { "format": "######", "regex": "^(\\\\d{6})$" }
-            }]
+            }
             """;
         server.enqueue(new MockResponse()
                 .setResponseCode(200)

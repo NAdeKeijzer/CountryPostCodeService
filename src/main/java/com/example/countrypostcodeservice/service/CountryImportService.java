@@ -3,7 +3,6 @@ package com.example.countrypostcodeservice.service;
 import com.example.countrypostcodeservice.domain.Country;
 import com.example.countrypostcodeservice.exception.CountryImportException;
 import com.example.countrypostcodeservice.repository.CountryRepository;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -25,35 +24,37 @@ public class CountryImportService {
         if (alpha2 == null || alpha2.isBlank()) return Optional.empty();
 
         String code = alpha2.trim();
-        String path = "/v3.1/alpha/" + code + "?fields=name,postalCode,cca2";
 
-        RestCountry[] response;
+        RestCountry rc;
         try {
-            response = client.get()
-                    .uri(path)
+            rc = client.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/v3.1/alpha/{code}")
+                            .queryParam("fields", "name,postalCode,cca2")
+                            .build(code))
                     .retrieve()
-                    .bodyToMono(RestCountry[].class)
+                    .bodyToMono(RestCountry.class)   // <-- single object
                     .block();
         } catch (WebClientResponseException e) {
-            if (e.getStatusCode() == HttpStatus.NOT_FOUND) return Optional.empty();
-            throw new CountryImportException("REST Countries returned " + e.getStatusCode().value()
-                    + " for " + path, e);
+            if (e.getStatusCode().value() == 404) return Optional.empty();
+            throw new CountryImportException(
+                    "REST Countries returned " + e.getStatusCode().value() + " for /v3.1/alpha/" + code,
+                    e
+            );
         } catch (Exception e) {
             throw new CountryImportException("Failed calling REST Countries: " + e.getMessage(), e);
         }
 
+        if (rc == null) return Optional.empty();
 
-        if (response == null || response.length == 0) return Optional.empty();
-
-        RestCountry rc = response[0];
-        String cca2 = rc.cca2 != null ? rc.cca2.toUpperCase() : code.toUpperCase();
+        String cca2   = rc.cca2 != null ? rc.cca2.toUpperCase() : code.toUpperCase();
         String common = rc.name != null ? rc.name.common : null;
-        String fmt = rc.postalCode != null ? rc.postalCode.format : null;
-        String regex = rc.postalCode != null ? rc.postalCode.regex : null;
+        String fmt    = rc.postalCode != null ? rc.postalCode.format : null;
+        String regex  = rc.postalCode != null ? rc.postalCode.regex : null;
 
         if (common == null) return Optional.empty();
 
-        Country country = new Country(cca2, common, fmt, regex);
-        return Optional.of(repo.save(country));
+        Country saved = repo.save(new Country(cca2, common, fmt, regex));
+        return Optional.of(saved);
     }
 }
