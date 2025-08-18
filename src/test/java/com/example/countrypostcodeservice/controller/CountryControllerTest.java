@@ -2,14 +2,13 @@ package com.example.countrypostcodeservice.controller;
 
 import com.example.countrypostcodeservice.dto.CountryInfoResponse;
 import com.example.countrypostcodeservice.service.CountryQueryService;
+import jakarta.annotation.Resource;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
-import jakarta.annotation.Resource;
 
 import java.util.Optional;
 

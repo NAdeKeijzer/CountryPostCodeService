@@ -45,12 +45,6 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- (Optional) Health endpoint at /actuator/health -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-
         <!-- Tests (JUnit, Mockito, etc.) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
